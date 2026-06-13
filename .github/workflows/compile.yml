@@ -1,0 +1,28 @@
+name: Compile SAMP Server
+
+on: push
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download PAWN Compiler
+        run: |
+          wget -q https://github.com/pawn-lang/compiler/releases/download/v3.10.11/pawnc-3.10.11-linux.tar.gz
+          tar xzf pawnc-3.10.11-linux.tar.gz
+
+      - name: Compile main.pwn
+        run: |
+          ./pawnc-3.10.11-linux/bin/pawncc main.pwn \
+            -i includes \
+            -i pawno/include \
+            -o main.amx
+
+      - name: Upload main.amx
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-amx
+          path: main.amx
