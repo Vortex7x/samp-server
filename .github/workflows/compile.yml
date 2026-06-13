@@ -1,25 +1,26 @@
 name: Compile SAMP Server
-
 on: push
-
 jobs:
   compile:
-    runs-on: ubuntu-22.04
-
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install PAWN Compiler
+      - name: Install Build Dependencies
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y pawn
+          sudo apt-get install -y cmake make g++
+
+      - name: Build PAWN Compiler
+        run: |
+          git clone --depth 1 https://github.com/pawn-lang/compiler.git /tmp/pawn
+          cmake -S /tmp/pawn -B /tmp/pawn/build
+          cmake --build /tmp/pawn/build -j$(nproc)
+          sudo cp /tmp/pawn/build/pawncc /usr/local/bin/pawncc
 
       - name: Compile main.pwn
         run: |
-          pawncc main.pwn \
-            -i includes \
-            -i pawno/include \
-            -o main.amx
+          pawncc main.pwn -i includes -i pawno/include -o main.amx
 
       - name: Upload main.amx
         uses: actions/upload-artifact@v4
